@@ -20,7 +20,6 @@ modules:
       disk-quota: 4096M
    properties: 
      SAP_JWT_TRUST_ACL: "[{\"clientid\":\"*\",\"identityzone\":\"*\"}]"
-     TMPDIR: ${HOME}
    provides:
     - name: srv-python-api   # required by consumers of CAP services (e.g. approuter)
       properties:

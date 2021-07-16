@@ -64,8 +64,3 @@ resources:
 # ---------------------------------------------------------
    type: org.cloudfoundry.existing-service
 
-
- # ok------------- Credential Store Service -------------------
- - name: nfse-credential-store
- # ------------------------------------------------------------
-   type: org.cloudfoundry.existing-service

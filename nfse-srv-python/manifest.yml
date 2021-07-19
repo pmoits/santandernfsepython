@@ -1,0 +1,7 @@
+---
+applications:
+- name: nfse-srv-python
+  buildpacks:
+  - python_buildpack
+  command: python app.py
+- timeout: 600

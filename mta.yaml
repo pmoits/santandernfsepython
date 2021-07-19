@@ -20,8 +20,10 @@ modules:
       disk-quota: 4096M
    properties: 
      SAP_JWT_TRUST_ACL: "[{\"clientid\":\"*\",\"identityzone\":\"*\"}]"
+     TMPDIR: /home/vcap/app/tmp
    provides:
     - name: srv-python-api   # required by consumers of CAP services (e.g. approuter)
+      public: true
       properties:
         srv-url: ${default-url}   
    requires:
@@ -39,24 +41,7 @@ resources:
  - name: nfse-destination-service
 # ---------------------------------------------------------
    type: org.cloudfoundry.existing-service
-   requires:
-     - name: srv-python-api
-   parameters:
-     config:
-       init_data:
-         subaccount:
-           existing_destinations_policy: update
-           destinations:
-             - Name: nfse-python
-               Description: Nfse Python Destination Service
-               Authentication: NoAuthentication
-               ProxyType: Internet
-               Type: HTTP
-               URL: ~{srv-python-api/srv-url}
-               HTML5.DynamicDestination: true
-               HTML5.ForwardAuthToken: true
-               HTML5.Timeout: 300000                               
-           
+ 
 
 
 # ok ------------------- XSUAA Service ---------------------

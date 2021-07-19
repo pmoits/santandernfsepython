@@ -4,6 +4,7 @@ imutils==0.5.4
 Flask==1.1.2
 imageio==2.9.0
 tensorflow==2.5.0
+#./vendor/tensorflow-2.5.0-cp37-cp37m-manylinux2010_x86_64.whl
 keras
 pyjwt
 Pillow==8.2.0

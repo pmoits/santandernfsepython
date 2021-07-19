@@ -1,4 +1,9 @@
 ---
 applications:
 - name: nfse-srv-python
+  buildpack: python_buildpack
+  instances: 1
+  timeout: 600
+
+
 

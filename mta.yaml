@@ -18,6 +18,7 @@ modules:
    parameters:
       memory: 4096M   
       disk-quota: 4096M
+      TMPDIR: ./nfse-srv-python/
    properties: 
      SAP_JWT_TRUST_ACL: "[{\"clientid\":\"*\",\"identityzone\":\"*\"}]"
    provides:

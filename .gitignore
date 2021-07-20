@@ -185,3 +185,5 @@ default-env.json
 deployer/
 .vscode/settings.json
 *.whl
+comandos.txt
+comandos

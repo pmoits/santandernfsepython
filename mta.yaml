@@ -1,6 +1,6 @@
 ## Generated mta.yaml based on template version 0.4.0
 ## appName = nfse-python
-## language=nodejs; multiTenant=false
+## language=python; multiTenant=false
 ## approuter=
 _schema-version: '3.1'
 ID: nfse-python
@@ -14,14 +14,14 @@ modules:
  - name: nfse-srv-python
  # ------------------------------------------------------------
    type: python
-   path: ./nfse-srv-python
+   path: ./nfse-python
    parameters:
       memory: 4096M   
-      disk-quota: 4096M
-      TMPDIR: ./nfse-srv-python/
+      disk-quota: 4096M   
+      timeout: 600000
+      buildpack: python_buildpack
    properties: 
      SAP_JWT_TRUST_ACL: "[{\"clientid\":\"*\",\"identityzone\":\"*\"}]"
-     TMPDIR: /home/vcap/app/tmp
    provides:
     - name: srv-python-api   # required by consumers of CAP services (e.g. approuter)
       public: true
@@ -42,6 +42,7 @@ resources:
  - name: nfse-destination-service
 # ---------------------------------------------------------
    type: org.cloudfoundry.existing-service
+   optional: true  # default value
  
 
 
@@ -49,4 +50,5 @@ resources:
  - name: nfse-xsuaa-service
 # ---------------------------------------------------------
    type: org.cloudfoundry.existing-service
+   optional: true  # default value
 

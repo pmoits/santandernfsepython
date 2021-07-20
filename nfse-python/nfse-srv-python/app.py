@@ -39,14 +39,13 @@ def home():
 @app.route('/ocr', methods=['POST'])
 def predict_text():
     try:
-
         #FILE
-        name1 = request.files['file']
-        b64_string = base64.b64encode(name1.read())
+        # name1 = request.files['file']
+        # b64_string = base64.b64encode(name1.read())
 
         #B64 STRING
-        # name1 = request.form['string']
-        # b64_string = name1
+        name1 = request.form['string']
+        b64_string = name1
 
         img = imread(io.BytesIO(base64.b64decode(b64_string)))
         predictions = []

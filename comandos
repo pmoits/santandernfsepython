@@ -1,8 +1,0 @@
-1.cf login
-
-
-2. build: mbt build
-
-3. deploy: cf deploy E:\Users\Daniel\OneDrive\santandernfsepython\mta_archives\nfse-python_1.0.0.mtar --retries 0
-
-4. check log: cf dmol -i <ID>

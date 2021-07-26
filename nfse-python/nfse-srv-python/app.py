@@ -8,9 +8,13 @@ import sklearn
 import numpy as np
 from tensorflow.keras.models import load_model
 import pickle
-#
+from cfenv import AppEnv
+from sap import xssec
+import json
+
 #
 app = Flask(__name__)
+env = AppEnv()
 #
 app.config['DEBUG'] = True
 UPLOAD_FOLDER = r'E:\Users\Daniel\OneDrive\CaptchaML\templates'
@@ -38,12 +42,24 @@ def home():
 #
 @app.route('/ocr', methods=['POST'])
 def predict_text():
+    # svcs_json = str(os.getenv("VCAP_SERVICES", 0)) #get environment variable
+    # svcs = json.loads(svcs_json)
+
+    uaa_service = env.get_service(label='xsuaa').credentials
+    access_token = request.headers.get('authorization')[7:]
+
+    security_context = xssec.create_security_context(access_token, uaa_service)
+    isAuthorized = security_context.check_scope('openid')
+
+    if not isAuthorized:
+        os.abort(403)
+        return 'Unauthorized !!'
     try:
-        #FILE
+        # FILE
         # name1 = request.files['file']
         # b64_string = base64.b64encode(name1.read())
 
-        #B64 STRING
+        # B64 STRING
         name1 = request.form['string']
         b64_string = name1
 
@@ -51,6 +67,7 @@ def predict_text():
         predictions = []
         raw_img = processing_lab.process_1(img)
         img = processing_lab.get_letters(raw_img)
+
         for letter in img:
             # rgb = cv2.cvtColor(letter, cv2.COLOR_BGR2RGB)
             # Re-size the letter image to 20x20 pixels to match training data
@@ -69,13 +86,12 @@ def predict_text():
 
             # Get captcha's text
             captcha_text = "".join(predictions)
-            # filename = name1.filename
-            # Find real captcha name
-            # end = filename.rfind('.')  # last occurence of '.'
-            # real = filename[:end]
-        return {'Predicted':captcha_text}
+
+        return {'Predicted': captcha_text}
     except:
         return 'Captcha error !!'
+
+
 #
 if __name__ == '__main__':
     # app.run(debug=True, use_debugger=False, use_reloader=False)

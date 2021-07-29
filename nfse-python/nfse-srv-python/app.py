@@ -42,54 +42,58 @@ def home():
 #
 @app.route('/ocr', methods=['POST'])
 def predict_text():
-    # svcs_json = str(os.getenv("VCAP_SERVICES", 0)) #get environment variable
-    # svcs = json.loads(svcs_json)
-
     uaa_service = env.get_service(label='xsuaa').credentials
+    print(uaa_service)
     access_token = request.headers.get('authorization')[7:]
-
+    print(access_token)
     security_context = xssec.create_security_context(access_token, uaa_service)
+    print(security_context)
+
+    if 'authorization' not in request.headers:
+        os.abort()
+        print('Missing authorization key !!')
     isAuthorized = security_context.check_scope('openid')
-
     if not isAuthorized:
-        os.abort(403)
-        return 'Unauthorized !!'
-    try:
-        # FILE
-        # name1 = request.files['file']
-        # b64_string = base64.b64encode(name1.read())
+        os.abort()
+    else:
+        try:
+            # FILE
+            # name1 = request.files['file']
+            # b64_string = base64.b64encode(name1.read())
 
-        # B64 STRING
-        name1 = request.form['string']
-        b64_string = name1
+            # B64 STRING
+            name1 = request.form['string']
+            b64_string = name1
 
-        img = imread(io.BytesIO(base64.b64decode(b64_string)))
-        predictions = []
-        raw_img = processing_lab.process_1(img)
-        img = processing_lab.get_letters(raw_img)
+            img = imread(io.BytesIO(base64.b64decode(b64_string)))
+            predictions = []
+            raw_img = processing_lab.process_1(img)
+            img = processing_lab.get_letters(raw_img)
 
-        for letter in img:
-            # rgb = cv2.cvtColor(letter, cv2.COLOR_BGR2RGB)
-            # Re-size the letter image to 20x20 pixels to match training data
-            letter_image = processing_lab.resize_to_fit(letter, 20, 20)
+            for letter in img:
+                # rgb = cv2.cvtColor(letter, cv2.COLOR_BGR2RGB)
+                # Re-size the letter image to 20x20 pixels to match training data
+                letter_image = processing_lab.resize_to_fit(letter, 20, 20)
 
-            # Turn the single image into a 4d list of images to make Keras happy
-            letter_image = np.expand_dims(letter_image, axis=2)
-            letter_image = np.expand_dims(letter_image, axis=0)
+                # Turn the single image into a 4d list of images to make Keras happy
+                letter_image = np.expand_dims(letter_image, axis=2)
+                letter_image = np.expand_dims(letter_image, axis=0)
 
-            # Ask the neural network to make a prediction
-            prediction = model.predict(letter_image)
+                # Ask the neural network to make a prediction
+                prediction = model.predict(letter_image)
 
-            # Convert the one-hot-encoded prediction back to a normal letter
-            letter = lb.inverse_transform(prediction)[0]
-            predictions.append(letter)
+                # Convert the one-hot-encoded prediction back to a normal letter
+                letter = lb.inverse_transform(prediction)[0]
+                predictions.append(letter)
 
-            # Get captcha's text
-            captcha_text = "".join(predictions)
+                # Get captcha's text
+                captcha_text = "".join(predictions)
 
-        return {'Predicted': captcha_text}
-    except:
-        return 'Captcha error !!'
+            # return {'Predicted': captcha_text}
+            return {'Predicted':captcha_text,'uaa_service':uaa_service,
+                    'access_token':access_token,'security_context':security_context}
+        except:
+            return 'Captcha error !!'
 
 
 #

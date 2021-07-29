@@ -1,0 +1,36 @@
+Manual para testar API no XSUAA com Postamn:
+
+
+1. Vá no arquivo default-env.json dentro do projeto principal /nfsesrv, procure pelo serviço "xsuaa"
+
+2. Dentro do Postman na aba Authorization escolha 
+
+Type: OAuth 2.0
+Add authorization data to: Request Headers
+
+
+3. Na direita, abaixo de Conmfigure New Token passe os seguintes parametros:
+
+Token Name: authentication
+
+Grant Type: Password Credentials
+
+Access Token URL: https://cf-bra-its-dev.authentication.eu20.hana.ondemand.com/oauth/token (url)
+
+Client ID: sb-nfse!t2116 (clientid)
+
+Client Secret: pbbBC7A7NNChRAIWKb9n9/k0nQw= (clientsecret)
+
+Username: @email
+
+Password: @senha
+
+Scope: nfse!t2116.nfse_admin (xsappname + ".nfse_admin")
+
+Client Authentication: Send as Basic Auth Header
+
+4. Clicar em Get New Access Token
+
+Referências:
+https://blogs.sap.com/2020/03/02/using-postman-for-api-testing-with-xsuaa/
+https://www.youtube.com/watch?v=FqVekMHviTc

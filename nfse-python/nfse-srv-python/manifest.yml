@@ -4,6 +4,8 @@ applications:
   buildpack: python_buildpack
   instances: 1
   timeout: 600
+  services:
+    - xsuaa
 
 
 

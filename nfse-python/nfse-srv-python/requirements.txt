@@ -10,3 +10,4 @@ Pillow==8.2.0
 sklearn
 sap-xssec
 cfenv
+sap-cf-logging==3.0.0

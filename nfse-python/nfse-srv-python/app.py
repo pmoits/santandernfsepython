@@ -43,18 +43,18 @@ def home():
 @app.route('/ocr', methods=['POST'])
 def predict_text():
     uaa_service = env.get_service(label='xsuaa').credentials
-    print(uaa_service)
+   
     access_token = request.headers.get('authorization')[7:]
-    print(access_token)
+
     security_context = xssec.create_security_context(access_token, uaa_service)
-    print(security_context)
+
 
     if 'authorization' not in request.headers:
-        os.abort()
+
         print('Missing authorization key !!')
     isAuthorized = security_context.check_scope('openid')
     if not isAuthorized:
-        os.abort()
+        print('Unauthorized')
     else:
         try:
             # FILE

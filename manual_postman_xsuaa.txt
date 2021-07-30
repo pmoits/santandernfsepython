@@ -1,6 +1,5 @@
 Manual para testar API no XSUAA com Postamn:
 
-
 1. Vá no arquivo default-env.json dentro do projeto principal /nfsesrv, procure pelo serviço "xsuaa"
 
 2. Dentro do Postman na aba Authorization escolha 
@@ -9,7 +8,7 @@ Type: OAuth 2.0
 Add authorization data to: Request Headers
 
 
-3. Na direita, abaixo de Conmfigure New Token passe os seguintes parametros:
+3. Na direita, abaixo de Configure New Token passe os seguintes parametros:
 
 Token Name: authentication
 

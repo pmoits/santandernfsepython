@@ -30,6 +30,12 @@ Client Authentication: Send as Basic Auth Header
 
 4. Clicar em Get New Access Token
 
+
 Referências:
 https://blogs.sap.com/2020/03/02/using-postman-for-api-testing-with-xsuaa/
+
 https://www.youtube.com/watch?v=FqVekMHviTc
+
+https://help.sap.com/viewer/b9902c314aef4afb8f7a29bf8c5b37b3/2021_2_QRC/en-US/63b26ec63c644e22b5c401cddaa84650.html
+
+https://github.com/SAP/cloud-pysec/blob/master/sap/xssec/security_context.py

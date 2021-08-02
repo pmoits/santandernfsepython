@@ -59,7 +59,7 @@ def predict_text():
     logger.info(access_token)
     logger.info(uaa_service)
     security_context = xssec.create_security_context(access_token, uaa_service)
-    isAuthorized = security_context.check_scope('nfse!t2116.nfse_admin')
+    isAuthorized = security_context.check_scope('nfse!t2116.nfse_foreigncall') #.nfse_admin para teste local
     # for scope in scopes:
     #     isAuthorized = security_context.check_scope(scope)
     #     logger.info(isAuthorized)
@@ -105,6 +105,7 @@ def predict_text():
             captcha_text = "".join(predictions)
 
         # return {'Predicted': captcha_text}
+        logger.info(captcha_text)
         return {'Predicted':captcha_text}
     except:
         return 'Captcha error !!'

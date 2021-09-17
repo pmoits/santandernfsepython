@@ -1,7 +1,9 @@
 ---
 applications:
 - name: nfse-srv-python
-  buildpack: python_buildpack
+  buildpacks: 
+    - https://github.com/Dangape/python-buildpack
+  stack: cflinuxfs3
   instances: 1
   timeout: 600
   services:

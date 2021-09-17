@@ -64,10 +64,11 @@ def predict_text():
     access_token = request.headers.get('Authorization')[7:]
     logger.info(access_token)
     logger.info(uaa_service)
+    scope = uaa_service['xsappname']
     security_context = xssec.create_security_context(access_token, uaa_service)
     # escopo PRE: nfse!t2893.nfse_foreigncall
     # escopo DEV: nfse!t2116.nfse_foreigncall
-    isAuthorized = security_context.check_scope('nfse!t2893.nfse_foreigncall') #.nfse_admin para teste local
+    isAuthorized = security_context.check_scope(scope+'.nfse_foreigncall') #.nfse_admin para teste local
 
     logger.info('Authorization found')
     logger.info(isAuthorized)

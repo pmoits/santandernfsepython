@@ -12,14 +12,16 @@ modules:
 
  # --------------------- PYTHON MODULE ------------------------
  - name: nfse-srv-python
- # ------------------------------------------------------------
-   type: python
-   path: ./nfse-python
+ # ------------------------------------------------------------   
+   type: application
    parameters:
       memory: 4096M   
       disk-quota: 4096M   
       timeout: 600000
-      buildpack: python_buildpack
+      docker:
+        image: sapits/python:python
+        username: sapits
+        password: Yu9gCHT4KnRb@A3seeZn
    properties: 
      SAP_JWT_TRUST_ACL: "[{\"clientid\":\"*\",\"identityzone\":\"*\"}]"
    provides:
@@ -32,8 +34,8 @@ modules:
     - name: nfse-destination-service
       parameters:
         content-target: true      
-
-
+   build-parameters: 
+     no-source: true
 
 
 resources:

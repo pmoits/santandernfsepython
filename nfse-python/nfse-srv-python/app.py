@@ -12,7 +12,7 @@ import pickle
 from cfenv import AppEnv
 from sap import xssec
 from cf_logging import flask_logging
-# import pytesseract
+import pytesseract
 
 
 #
@@ -33,8 +33,8 @@ MODEL_FILENAME = "nfse-srv-python/result_model_letter.h5"
 MODEL_LABELS_FILENAME = "nfse-srv-python/model_labels.dat"
 MODEL_CLASSIFICATION_FILENAME = "nfse-srv-python/captcha_classification_model.hdf5"
 MODEL_CLASSIFICATION_LABELS_FILENAME = "nfse-srv-python/model_classification_labels.dat"
-# pytesseract.pytesseract.tesseract_cmd = 'nfse-srv-python/tessdata/bin/tesseract'
 
+pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
 # Load up the model labels (so we can translate model predictions to actual letters)
 with open(MODEL_LABELS_FILENAME, "rb") as f:
     lb = pickle.load(f)
@@ -82,58 +82,68 @@ def predict_text():
         # name1 = request.files['file']
         # b64_string = base64.b64encode(name1.read())
 
-        ## B64 STRING
-        name1 = request.form['string']
-        b64_string = name1
+        # B64 STRING
+        # name1 = request.form['string']
+        name1 = request.form
+        key = name1.to_dict(flat=False)
+        key, value = list(key.items())[0]
+        if key == 'string':
+            b64_string = name1['string']
 
-        # read b64 image
-        img = imread(io.BytesIO(base64.b64decode(b64_string)))
+            # read b64 image
+            img = imread(io.BytesIO(base64.b64decode(b64_string)))
 
-        # Classify image
-        captcha_class = processing_lab.classify_captcha(img)
-        captcha_image = processing_lab.resize_to_fit(captcha_class, 20, 20)
-        # Turn the single image into a 4d list of images to make Keras happy
-        captcha_image = np.expand_dims(captcha_image, axis=2)
-        captcha_image = np.expand_dims(captcha_image, axis=0)
-        # Ask the neural network to make a prediction
-        prediction = classification.predict(captcha_image)
-        # Convert the one-hot-encoded prediction back to a normal letter
-        captcha_class = int(lb_class.inverse_transform(prediction)[0])
-
-        predictions = []
-
-        # apply different model depending on the captcha type
-        if captcha_class in [1,2]:
-            img = processing_lab.model1(img)
-        elif captcha_class == 7:
-            img = processing_lab.model2(img)
-        elif captcha_class == 8:
-            img = processing_lab.model3(img)
-
-        for letter in img:
-            # rgb = cv2.cvtColor(letter, cv2.COLOR_BGR2RGB)
-            # Re-size the letter image to 20x20 pixels to match training data
-            letter_image = processing_lab.resize_to_fit(letter, 20, 20)
-
+            # Classify image
+            captcha_class = processing_lab.classify_captcha(img)
+            captcha_image = processing_lab.resize_to_fit(captcha_class, 20, 20)
             # Turn the single image into a 4d list of images to make Keras happy
-            letter_image = np.expand_dims(letter_image, axis=2)
-            letter_image = np.expand_dims(letter_image, axis=0)
-
+            captcha_image = np.expand_dims(captcha_image, axis=2)
+            captcha_image = np.expand_dims(captcha_image, axis=0)
             # Ask the neural network to make a prediction
-            prediction = model.predict(letter_image)
-
+            prediction = classification.predict(captcha_image)
             # Convert the one-hot-encoded prediction back to a normal letter
-            letter = lb.inverse_transform(prediction)[0]
-            predictions.append(letter)
+            captcha_class = int(lb_class.inverse_transform(prediction)[0])
+            # print(captcha_class)
 
-            # Get captcha's text
-            captcha_text = "".join(predictions)
-            captcha_text = captcha_text.replace("_", "")
-            # filename = name1.filename
-            # Find real captcha name
-            # end = filename.rfind('.')  # last occurence of '.'
-            # real = filename[:end]
-        return {'Predicted': captcha_text}
+            predictions = []
+
+            # apply different model depending on the captcha type
+            if captcha_class in [1, 2]:
+                img = processing_lab.model1(img)
+            elif captcha_class == 7:
+                img = processing_lab.model2(img)
+            elif captcha_class == 8:
+                img = processing_lab.model3(img)
+
+            for letter in img:
+                # rgb = cv2.cvtColor(letter, cv2.COLOR_BGR2RGB)
+                # Re-size the letter image to 20x20 pixels to match training data
+                letter_image = processing_lab.resize_to_fit(letter, 20, 20)
+
+                # Turn the single image into a 4d list of images to make Keras happy
+                letter_image = np.expand_dims(letter_image, axis=2)
+                letter_image = np.expand_dims(letter_image, axis=0)
+
+                # Ask the neural network to make a prediction
+                prediction = model.predict(letter_image)
+
+                # Convert the one-hot-encoded prediction back to a normal letter
+                letter = lb.inverse_transform(prediction)[0]
+                predictions.append(letter)
+
+                # Get captcha's text
+                captcha_text = "".join(predictions)
+                captcha_text = captcha_text.replace("_", "")
+                # filename = name1.filename
+                # Find real captcha name
+                # end = filename.rfind('.')  # last occurence of '.'
+                # real = filename[:end]
+            return {'Predicted': captcha_text}
+        if key == 'code':
+            code = name1['code']
+            captcha = processing_lab.model4(code, 30)
+
+            return {'Predicted': str(captcha)}
     except:
         return {'Predicted': 'error!!'}
 

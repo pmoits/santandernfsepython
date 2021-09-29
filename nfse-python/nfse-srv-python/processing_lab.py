@@ -1,7 +1,10 @@
 import numpy as np
 import imutils
 import cv2
-from PIL import Image
+from PIL import Image, ImageColor,ImageFilter, ImageEnhance
+import pytesseract
+from collections import Counter
+import requests
 
 # 1 = caxias
 # 2 = barueri
@@ -342,3 +345,77 @@ def classify_captcha(captcha):
 
     return img
 
+def model4(url_code,attempts):
+    # Initialize letter positions
+    pos1 = list()
+    pos2 = list()
+    pos3 = list()
+    pos4 = list()
+    pos5 = list()
+    pos6 = list()
+    tries = 1
+    while tries <= attempts:
+        # get new captcha image
+        img_url = "https://e-gov.betha.com.br/e-nota/bfcfaces/captcha.jpg?text=" + url_code
+
+        img_data = requests.get(img_url).content
+        nparr = np.fromstring(img_data, np.uint8)
+        img_np = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+        # Open image with opencv
+        image = np.asarray(img_np)
+
+        #Load image to PIL
+        imageObject = Image.fromarray(image)
+
+        # Size of the image in pixels (size of original image)
+        width, height = imageObject.size
+
+        # Setting size of each image
+        size = width / 6
+        size_ex = size * 1.2
+
+        left = 0
+        count = 1
+
+        while count <= 6:
+
+            top = 1
+            bottom = height
+
+            if count == 1:
+                left = 0
+            else:
+                left = left + size
+
+            right = left + size_ex
+
+            img = imageObject.crop(((left * 0.9), top, right, bottom))
+
+            img.filter(ImageFilter.SHARPEN)
+            img.filter(ImageFilter.SHARPEN)
+            img.filter(ImageFilter.SHARPEN)
+
+            text = pytesseract.image_to_string(img, lang="eng", config='--psm 10')
+
+            caracter = ""
+            for char in text:
+                if char.isalpha() == True:
+                    if char.isupper() == True:
+                        caracter = char
+
+            if caracter != "":
+                if count == 1: pos1.append(caracter)
+                if count == 2: pos2.append(caracter)
+                if count == 3: pos3.append(caracter)
+                if count == 4: pos4.append(caracter)
+                if count == 5: pos5.append(caracter)
+                if count == 6: pos6.append(caracter)
+
+            count = count + 1 #increase letter position
+        tries = tries + 1 #increase try count
+
+    captcha = str(Counter(pos1).most_common()[0][0] + Counter(pos2).most_common()[0][0] +
+                  Counter(pos3).most_common()[0][0] + Counter(pos4).most_common()[0][0] +
+                  Counter(pos5).most_common()[0][0] + Counter(pos6).most_common()[0][0])
+    return captcha

@@ -12,3 +12,4 @@ sap-xssec
 cfenv
 sap-cf-logging==3.0.0
 pytesseract
+uwsgi

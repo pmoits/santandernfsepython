@@ -18,6 +18,7 @@ COPY model_labels.dat /app
 COPY result_model_letter.h5 /app
 COPY result_model_classification.h5 /app
 COPY model_classification_labels.dat /app
+COPY uwsgi.ini /app
 
 
 RUN pip3 install --upgrade pip
@@ -27,5 +28,5 @@ COPY . /app
 
 #EXPOSE 5000
 
-ENTRYPOINT [ "uwsgi", "--ini", "uwsgi.ini"]
-#CMD ['python',"app.py"]
+CMD [ "uwsgi", "--ini", "uwsgi.ini"]
+#CMD ['python3',"app.py"]

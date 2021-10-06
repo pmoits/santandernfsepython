@@ -5,6 +5,8 @@ from PIL import Image, ImageColor,ImageFilter, ImageEnhance
 import pytesseract
 from collections import Counter
 import requests
+import tensorflow as tf
+import pytesseract
 
 # 1 = caxias
 # 2 = barueri
@@ -17,54 +19,9 @@ import requests
 model1 = 1,2
 model2 = 7
 model3 = 8
+model4 = SJ,Criciuma,Imbituba
+model5 = 9
 '''
-def process_2(path):
-
-    # Load image
-    # img = cv2.imread(path)
-    # Grayscaling
-    img = cv2.cvtColor(path, cv2.COLOR_RGB2GRAY)
-
-    _,thresh = cv2.threshold(img,127,255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
-
-    img = Image.fromarray(img)
-    img = img.convert("P")
-    img2 = Image.new("P", img.size, 255)
-
-    for x in range(img.size[1]): #iterate columns
-        for y in range(img.size[0]): #iterate lines
-            pixel_color = img.getpixel((y,x))
-            if pixel_color < 127:
-                img2.putpixel((y,x),0)
-
-    img = np.asarray(img2)
-    img = cv2.bitwise_not(img)
-    return img
-
-def process_3(path):
-    # Load image
-    # img = cv2.imread(path)
-    # Grayscaling
-    # img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-
-    _,thresh = cv2.threshold(path,127,255, cv2.THRESH_BINARY + cv2.THRESH_TRUNC)
-
-    close = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, np.ones((2, 1), np.uint8))
-    dilate = cv2.dilate(close, np.ones((4, 1), np.uint8), iterations=1)
-
-    img = Image.fromarray(dilate)
-    img = img.convert("P")
-    img2 = Image.new("P", img.size, 255)
-
-    for x in range(img.size[1]): #iterate columns
-        for y in range(img.size[0]): #iterate lines
-            pixel_color = img.getpixel((y,x))
-            if pixel_color <127:
-                img2.putpixel((y,x),0)
-
-    img = np.asarray(img2)
-    return img
-
 def model1(captcha):
     """
        A function to create contours of captcha's letters for cities 1 and 2
@@ -419,3 +376,39 @@ def model4(url_code,attempts):
                   Counter(pos3).most_common()[0][0] + Counter(pos4).most_common()[0][0] +
                   Counter(pos5).most_common()[0][0] + Counter(pos6).most_common()[0][0])
     return captcha
+
+def model5(img,img_height,img_width):
+    # Original image
+    # raw_img = cv2.imread(file)
+    # convert to gray
+    img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    # apply median blur
+    blur = cv2.medianBlur(img, 3)
+    # treshold
+    _, img = cv2.threshold(blur, 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+    # reduce line thickness
+    kernel = np.ones((2, 2), np.uint8)
+    img = cv2.dilate(img, kernel, iterations=1)
+    img = cv2.imencode('.png', img)[1].tostring() #encode image to png
+    # 1. Read image
+    # img = tf.io.read_file(file)
+    # img = tf.convert_to_tensor(img, dtype=tf.float32)
+    # print('SHAPE0', img.shape)
+    # 2. Decode and convert to grayscale
+    img = tf.io.decode_png(img, channels=1)
+    # print('SHAPE1', img.shape)
+    # img = tf.expand_dims(img, 2)
+    # 3. Convert to float32 in [0, 1] range
+    img = tf.image.convert_image_dtype(img, tf.float32)
+    # print('SHAPE2', img.shape)
+    # 4. Resize to the desired size
+    img = tf.image.resize(img, [img_height, img_width])
+    # print('SHAPE3', img.shape)
+    # 5. Transpose the image because we want the time
+    # dimension to correspond to the width of the image.
+    img = tf.transpose(img, perm=[1, 0, 2])
+    # print('SHAPE4', img.shape)
+    img = np.expand_dims(img, axis=0)
+
+    return img

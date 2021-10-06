@@ -13,6 +13,9 @@ from cfenv import AppEnv
 from sap import xssec
 from cf_logging import flask_logging
 import pytesseract
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers
 
 
 #
@@ -30,6 +33,7 @@ MODEL_FILENAME = "/app/result_model_letter.h5"
 MODEL_LABELS_FILENAME = "/app/model_labels.dat"
 MODEL_CLASSIFICATION_FILENAME = "/app/captcha_classification_model.hdf5"
 MODEL_CLASSIFICATION_LABELS_FILENAME = "/app/model_classification_labels.dat"
+MODEL_CTC_FILENAME = "/app/result_model_ctc.h5"
 
 # # PYTHON SERVICE
 # MODEL_FILENAME = "nfse-srv-python/result_model_letter.h5"
@@ -48,6 +52,30 @@ with open(MODEL_CLASSIFICATION_LABELS_FILENAME, "rb") as f:
 # Load the trained neural network
 model = load_model(MODEL_FILENAME)
 classification = load_model(MODEL_CLASSIFICATION_FILENAME)
+
+#Load CTC model
+#Load CTCLayer class
+class CTCLayer(layers.Layer):
+    def __init__(self, name=None,**kwargs):
+        super().__init__(name=name,**kwargs)
+        self.loss_fn = keras.backend.ctc_batch_cost
+
+    def call(self, y_true, y_pred):
+        # Compute the training-time loss value and add it
+        # to the layer using `self.add_loss()`.
+        batch_len = tf.cast(tf.shape(y_true)[0], dtype="int64")
+        input_length = tf.cast(tf.shape(y_pred)[1], dtype="int64")
+        label_length = tf.cast(tf.shape(y_true)[1], dtype="int64")
+
+        input_length = input_length * tf.ones(shape=(batch_len, 1), dtype="int64")
+        label_length = label_length * tf.ones(shape=(batch_len, 1), dtype="int64")
+
+        loss = self.loss_fn(y_true, y_pred, input_length, label_length)
+        self.add_loss(loss)
+
+        # At test time, just return the computed predictions
+        return y_pred
+model_ctc = load_model(MODEL_CTC_FILENAME,custom_objects={'CTCLayer': CTCLayer})
 
 uaa_service = env.get_service(label='xsuaa').credentials
 #
@@ -117,6 +145,28 @@ def predict_text():
                 img = processing_lab.model2(img)
             elif captcha_class == 8:
                 img = processing_lab.model3(img)
+            elif captcha_class == 9:
+                img = processing_lab.model5(img, 50, 200)
+                d = {'8': 1, '6': 2, '2': 3, '7': 4, '9': 5, '1': 6, '5': 7, '3': 8, '10': 9,
+                     '4': 0}  # num_to_char dict
+                # Get the prediction model by extracting layers till the output layer
+                prediction_model = keras.models.Model(
+                    model_ctc.get_layer(name="image").input, model_ctc.get_layer(name="dense2").output
+                )
+
+                # print(prediction_model.summary())
+                pred = prediction_model.predict(img)
+
+                input_len = np.ones(pred.shape[0]) * pred.shape[1]
+                # Use greedy search. For complex tasks, you can use beam search
+                results = keras.backend.ctc_decode(pred, input_length=input_len, greedy=True)[0][0][:, :6]
+                # Iterate over the results and get back the text
+                output_text = []
+                for res in results:
+                    res = list(map(str, list(np.array(res))))
+                    res = list(map(d.get, res))
+                    output_text.append(res)
+                return {'Predicted': ''.join(map(str, output_text[0]))}
 
             for letter in img:
                 # rgb = cv2.cvtColor(letter, cv2.COLOR_BGR2RGB)

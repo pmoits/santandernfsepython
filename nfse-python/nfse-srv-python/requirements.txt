@@ -3,7 +3,7 @@ opencv-python-headless
 imutils==0.5.4
 Flask==1.1.2
 imageio==2.9.0
-tensorflow==2.5.0
+tensorflow==2.6.0
 keras
 pyjwt
 Pillow==8.2.0

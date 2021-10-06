@@ -19,6 +19,7 @@ COPY result_model_letter.h5 /app
 COPY result_model_classification.h5 /app
 COPY model_classification_labels.dat /app
 COPY uwsgi.ini /app
+COPY result_model_ctc.h5 /app
 
 
 RUN pip3 install --upgrade pip

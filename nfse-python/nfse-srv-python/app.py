@@ -40,6 +40,7 @@ MODEL_CTC_FILENAME = "/app/result_model_ctc.h5"
 # MODEL_LABELS_FILENAME = "nfse-srv-python/model_labels.dat"
 # MODEL_CLASSIFICATION_FILENAME = "nfse-srv-python/captcha_classification_model.hdf5"
 # MODEL_CLASSIFICATION_LABELS_FILENAME = "nfse-srv-python/model_classification_labels.dat"
+# MODEL_CTC_FILENAME = "nfse-srv-python/result_model_ctc.h5"
 
 pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
 # Load up the model labels (so we can translate model predictions to actual letters)

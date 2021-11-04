@@ -55,7 +55,7 @@ with open(MODEL_LABELS_FILENAME_UPPER, "rb") as f:
 
 # Load the trained neural network
 model = load_model(MODEL_FILENAME)
-classification = load_model(MODEL_CLASSIFICATION_FILENAME)
+# classification = load_model(MODEL_CLASSIFICATION_FILENAME)
 model_upper = load_model(MODEL_UPPER)
 
 #Load CTC model
@@ -128,19 +128,6 @@ def predict_text():
 
             # read b64 image
             img = imread(io.BytesIO(base64.b64decode(b64_string)))
-
-            # # Classify image
-            # captcha_class = processing_lab.classify_captcha(img)
-            # captcha_image = processing_lab.resize_to_fit(captcha_class, 20, 20)
-            # # Turn the single image into a 4d list of images to make Keras happy
-            # captcha_image = np.expand_dims(captcha_image, axis=2)
-            # captcha_image = np.expand_dims(captcha_image, axis=0)
-            # # Ask the neural network to make a prediction
-            # prediction = classification.predict(captcha_image)
-            # # Convert the one-hot-encoded prediction back to a normal letter
-            # captcha_class = int(lb_class.inverse_transform(prediction)[0])
-            # # print(captcha_class)
-
             predictions = []
 
             # apply different model depending on the captcha type
@@ -171,10 +158,6 @@ def predict_text():
                     # Get captcha's text
                     captcha_text = "".join(predictions)
                     captcha_text = captcha_text.replace("_", "")
-                    # filename = name1.filename
-                    # Find real captcha name
-                    # end = filename.rfind('.')  # last occurence of '.'
-                    # real = filename[:end]
                 return {'Predicted': captcha_text}
             elif int(name1['id']) == 9:
                 img = processing_lab.model5(img, 50, 200)

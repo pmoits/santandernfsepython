@@ -31,8 +31,8 @@ app.secret_key = "secret key"
 # # DOCKER SERVICE
 MODEL_FILENAME = "/app/result_model_letter.h5"
 MODEL_LABELS_FILENAME = "/app/model_labels.dat"
-MODEL_CLASSIFICATION_FILENAME = "/app/captcha_classification_model.hdf5"
-MODEL_CLASSIFICATION_LABELS_FILENAME = "/app/model_classification_labels.dat"
+MODEL_UPPER = "/app/result_model_letter_upper.h5"
+MODEL_LABELS_FILENAME_UPPER = "/app/model_labels_upper.dat"
 MODEL_CTC_FILENAME = "/app/result_model_ctc.h5"
 
 # # PYTHON SERVICE
@@ -50,9 +50,13 @@ with open(MODEL_LABELS_FILENAME, "rb") as f:
 with open(MODEL_CLASSIFICATION_LABELS_FILENAME, "rb") as f:
     lb_class = pickle.load(f)
 
+with open(MODEL_LABELS_FILENAME_UPPER, "rb") as f:
+    lb_upper = pickle.load(f)
+
 # Load the trained neural network
 model = load_model(MODEL_FILENAME)
 classification = load_model(MODEL_CLASSIFICATION_FILENAME)
+model_upper = load_model(MODEL_UPPER)
 
 #Load CTC model
 #Load CTCLayer class
@@ -125,28 +129,54 @@ def predict_text():
             # read b64 image
             img = imread(io.BytesIO(base64.b64decode(b64_string)))
 
-            # Classify image
-            captcha_class = processing_lab.classify_captcha(img)
-            captcha_image = processing_lab.resize_to_fit(captcha_class, 20, 20)
-            # Turn the single image into a 4d list of images to make Keras happy
-            captcha_image = np.expand_dims(captcha_image, axis=2)
-            captcha_image = np.expand_dims(captcha_image, axis=0)
-            # Ask the neural network to make a prediction
-            prediction = classification.predict(captcha_image)
-            # Convert the one-hot-encoded prediction back to a normal letter
-            captcha_class = int(lb_class.inverse_transform(prediction)[0])
-            # print(captcha_class)
+            # # Classify image
+            # captcha_class = processing_lab.classify_captcha(img)
+            # captcha_image = processing_lab.resize_to_fit(captcha_class, 20, 20)
+            # # Turn the single image into a 4d list of images to make Keras happy
+            # captcha_image = np.expand_dims(captcha_image, axis=2)
+            # captcha_image = np.expand_dims(captcha_image, axis=0)
+            # # Ask the neural network to make a prediction
+            # prediction = classification.predict(captcha_image)
+            # # Convert the one-hot-encoded prediction back to a normal letter
+            # captcha_class = int(lb_class.inverse_transform(prediction)[0])
+            # # print(captcha_class)
 
             predictions = []
 
             # apply different model depending on the captcha type
-            if captcha_class in [1, 2]:
+            if int(name1['id']) in [1, 2]:
                 img = processing_lab.model1(img)
-            elif captcha_class == 7:
+            elif int(name1['id']) == 7:
                 img = processing_lab.model2(img)
-            elif captcha_class == 8:
+            elif int(name1['id']) == 8:
                 img = processing_lab.model3(img)
-            elif captcha_class == 9:
+            elif int(name1['id']) == 11:
+                img = processing_lab.model6(img)
+                for letter in img:
+                    # rgb = cv2.cvtColor(letter, cv2.COLOR_BGR2RGB)
+                    # Re-size the letter image to 20x20 pixels to match training data
+                    letter_image = processing_lab.resize_to_fit(letter, 20, 20)
+
+                    # Turn the single image into a 4d list of images to make Keras happy
+                    letter_image = np.expand_dims(letter_image, axis=2)
+                    letter_image = np.expand_dims(letter_image, axis=0)
+
+                    # Ask the neural network to make a prediction
+                    prediction = model_upper.predict(letter_image)
+
+                    # Convert the one-hot-encoded prediction back to a normal letter
+                    letter = lb_upper.inverse_transform(prediction)[0]
+                    predictions.append(letter)
+
+                    # Get captcha's text
+                    captcha_text = "".join(predictions)
+                    captcha_text = captcha_text.replace("_", "")
+                    # filename = name1.filename
+                    # Find real captcha name
+                    # end = filename.rfind('.')  # last occurence of '.'
+                    # real = filename[:end]
+                return {'Predicted': captcha_text}
+            elif int(name1['id']) == 9:
                 img = processing_lab.model5(img, 50, 200)
                 d = {'8': 1, '6': 2, '2': 3, '7': 4, '9': 5, '1': 6, '5': 7, '3': 8, '10': 9,
                      '4': 0}  # num_to_char dict

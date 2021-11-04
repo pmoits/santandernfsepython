@@ -14,13 +14,16 @@ import pytesseract
 # 7 = aparecido de goiania
 # 8 = belo horizonte
 # 9 = blumenau
+# 10 = SJ, Criciúma, Imbituba
+# 11 = Santa cruz
 
 '''
 model1 = 1,2
 model2 = 7
 model3 = 8
-model4 = SJ,Criciuma,Imbituba
+model4 = SJ,Criciuma,Imbituba (id 10)
 model5 = 9
+model6 = 11
 '''
 def model1(captcha):
     """
@@ -412,3 +415,91 @@ def model5(img,img_height,img_width):
     img = np.expand_dims(img, axis=0)
 
     return img
+
+def model6(captcha):
+    #read image
+    raw_img = cv2.cvtColor(captcha, cv2.COLOR_RGB2BGR)
+    #get height and width
+    height, width, _ = raw_img.shape
+
+    # select just black pixels and paint every thing else with white [255,255,255]
+    for i in range(height):
+        for j in range(width):
+            if any(raw_img[i, j] != [0, 0, 0]):
+                raw_img[i, j] = [255, 255, 255]
+
+    # convert to gray
+    img = cv2.cvtColor(raw_img, cv2.COLOR_RGB2GRAY)
+
+    # apply median blur
+    blur = cv2.medianBlur(img, 5)
+
+    # treshold
+    _, img = cv2.threshold(blur, 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    # reduce line thickness
+    kernel = np.ones((2, 2), np.uint8)
+    img = cv2.dilate(img, kernel, iterations=1)
+
+    # find letter contours
+    _, img = cv2.threshold(img, 100, 255, 1)
+
+    contornos, hierarchy = cv2.findContours(img, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_NONE)
+    hierarchy = hierarchy[0]  # get the actual inner list of hierarchy descriptions
+    regiao_letras = []
+
+    # filter contours that are letters
+    max_w, max_h = img.shape[:2]
+
+    for component in zip(contornos, hierarchy):
+        currentContour = component[0]
+        currentHierarchy = component[1]
+
+        (x, y, l, a) = cv2.boundingRect(currentContour)
+        if l >= max_w:
+            pass
+        else:
+            # print('Contour:')
+            area = cv2.contourArea(currentContour)
+            # print('Area:', area)
+            # print(x, y, l, a)
+            # print('Hierarchy:', currentHierarchy)
+
+            # check contour hierachy
+            '''
+            hierarchyDataOfAContour[2] describes the children of that contour (if it is negative then that is an inner contour), 
+            and hierarchyDataOfAContour[3] describes the parents of that contour (if it is negative then that is an exterior contour).
+            '''
+            if currentHierarchy[2] != -1 or currentHierarchy[2] == currentHierarchy[3]:
+                if area >= 90:
+                    # if l / a > 1.2:
+                    #     # if l>a:
+                    #     # pass
+                    #     half_width = int(a / 2)
+                    #     regiao_letras.append((x, y, half_width, a))
+                    #     regiao_letras.append((x + half_width, y, half_width, a))
+                    # else:
+                    regiao_letras.append((x, y, l, a))
+            else:
+                pass
+
+    regiao_letras = sorted(regiao_letras, key=lambda x: x[0])
+    prod = []
+
+    if len(regiao_letras) > 6:
+        for i in regiao_letras:
+            prod.append(i[2] * i[3])
+        min_index = prod.index(min(prod))
+        del regiao_letras[min_index]
+    # print(regiao_letras)
+
+    # desenhar contornos e separar em arquivos
+    img_final = cv2.merge([img] * 3)
+
+    lista_letras = []
+    for retangulo in regiao_letras:
+        x, y, l, a = retangulo
+        img_letra = img[y - 2: y + a + 2, x - 2: x + l + 2]
+
+        cv2.rectangle(img_final, (x - 2, y - 2), (x + l + 2, y + a + 2), (0, 255, 0), 1)
+        lista_letras.append(img_letra)
+    return lista_letras

@@ -47,8 +47,8 @@ pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
 with open(MODEL_LABELS_FILENAME, "rb") as f:
     lb = pickle.load(f)
 
-with open(MODEL_CLASSIFICATION_LABELS_FILENAME, "rb") as f:
-    lb_class = pickle.load(f)
+# with open(MODEL_CLASSIFICATION_LABELS_FILENAME, "rb") as f:
+#     lb_class = pickle.load(f)
 
 with open(MODEL_LABELS_FILENAME_UPPER, "rb") as f:
     lb_upper = pickle.load(f)

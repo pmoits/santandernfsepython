@@ -16,8 +16,8 @@ RUN apt-get install -y tesseract-ocr
 
 COPY model_labels.dat /app
 COPY result_model_letter.h5 /app
-COPY result_model_classification.h5 /app
-COPY model_classification_labels.dat /app
+COPY model_labels_upper.dat /app
+COPY result_model_letter_upper.h5 /app
 COPY uwsgi.ini /app
 COPY result_model_ctc.h5 /app
 

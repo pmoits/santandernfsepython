@@ -3,7 +3,7 @@ opencv-python-headless
 imutils==0.5.4
 Flask==1.1.2
 imageio==2.9.0
-tensorflow==2.6.0
+tensorflow==2.6.2
 keras
 pyjwt
 Pillow==8.2.0
@@ -12,4 +12,4 @@ sap-xssec
 cfenv
 sap-cf-logging==3.0.0
 pytesseract
-uwsgi
+uwsgi == 2.0.19.1

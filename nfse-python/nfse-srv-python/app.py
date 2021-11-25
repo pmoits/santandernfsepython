@@ -25,7 +25,7 @@ flask_logging.init(app, logging.INFO)
 #
 app.config['DEBUG'] = True
 UPLOAD_FOLDER = r'E:\Users\Daniel\OneDrive\CaptchaML\templates'
-ALLOWED_EXTENSIONS = ['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif']
+ALLOWED_CAPTCHAS = [1,2,7,8,11,10,9]
 app.secret_key = "secret key"
 #
 # # DOCKER SERVICE
@@ -201,18 +201,27 @@ def predict_text():
                 # Get captcha's text
                 captcha_text = "".join(predictions)
                 captcha_text = captcha_text.replace("_", "")
-                # filename = name1.filename
-                # Find real captcha name
-                # end = filename.rfind('.')  # last occurence of '.'
-                # real = filename[:end]
+
             return {'Predicted': captcha_text}
-        if key == 'code':
+
+        elif int(name1['id']) not in ALLOWED_CAPTCHAS:
+            return {'Predicted': 'Captcha ID not allowed!!'}
+
+        if key == 'code' and int(name1['id']) == 10:
             code = name1['code']
             captcha = processing_lab.model4(code, 30)
-
             return {'Predicted': str(captcha)}
-    except:
-        return {'Predicted': 'error!!'}
+        elif key == 'code':
+            return {'Predicted': 'Wrong captcha ID with key CODE'}
+
+    except Exception as e:
+        logger.info(e)
+        if key == 'code':
+            return {'Predicted': 'There was an error reading the image, check python log!!'}
+        else:
+            return {'Predicted': 'There was an error reading the image, check python log!!', 'b64': b64_string,
+                    'error': str(e)}
+
 
 if __name__ == '__main__':
     # app.run(debug=True, use_debugger=False, use_reloader=False)

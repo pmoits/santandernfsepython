@@ -1,0 +1,22 @@
+docker-compose build && 
+docker-compose up && 
+docker image tag api_keras_captcha dangape/api_keras && 
+docker push dangape/api_keras
+
+docker start captcha &&
+docker satrt docker_nfe
+
+#With docker-compose (Dangape)
+docker-compose build && docker-compose up && docker image tag api_keras_captcha dangape/api_keras && docker push dangape/api_keras
+
+docker-compose build -and docker-compose up
+
+
+#Without docker-compose (sapits)
+cd "C:\Users\DANIEL BEMERGUY\OneDrive\santandernfsepython\nfse-python\nfse-srv-python"
+docker build -t sapits/python:python .
+docker push sapits/python:python
+docker image tag
+
+#Upload no tensorboard
+tensorboard dev upload --logdir ./logs --name "classification_captcha" --description "testing classification captcha model for tensorboard" --one_shot

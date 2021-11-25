@@ -215,9 +215,10 @@ def predict_text():
             return {'Predicted': 'Wrong captcha ID with key CODE'}
 
     except Exception as e:
+        logger.info('ERROR MSG')
         logger.info(e)
         if key == 'code':
-            return {'Predicted': 'There was an error reading the image, check python log!!'}
+            return {'Predicted': 'There was an error reading the image, check python log!!','code':code}
         else:
             return {'Predicted': 'There was an error reading the image, check python log!!', 'b64': b64_string,
                     'error': str(e)}

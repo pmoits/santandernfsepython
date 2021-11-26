@@ -204,6 +204,9 @@ def predict_text():
 
             return {'Predicted': captcha_text}
 
+        elif int(name1['id']) == 10:
+            return {'REQUEST ERROR': 'Captcha ID 10 does not receive B64 STRING parameter!!'}
+
         elif int(name1['id']) not in ALLOWED_CAPTCHAS:
             return {'Predicted': 'Captcha ID not allowed!!'}
 

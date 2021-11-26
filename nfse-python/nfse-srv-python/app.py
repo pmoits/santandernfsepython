@@ -212,8 +212,7 @@ def predict_text():
             captcha = processing_lab.model4(code, 30)
             return {'Predicted': str(captcha)}
         elif key == 'code' and int(name1['id']) != 10:
-            return {'REQUEST ERROR': 'Wrong ID for key CODE!!'}
-
+            return {'REQUEST ERROR': 'Wrong ID for key CODE!! ID must be 10 but found value: ' + str(name1['id'])}
     except Exception as e:
         logger.info('ERROR MSG')
         logger.info(e)
@@ -225,12 +224,11 @@ def predict_text():
             return {'REQUEST ERROR': 'ID key passed with no value inside!!'}
 
         elif int(name1['id']) not in ALLOWED_CAPTCHAS:  # not passing an valid ID
-            print('aqui')
             return {'REQUEST ERROR': 'Captcha ID not allowed!! Verify ID value'}
 
         else:
             return {'PYTHON ERROR': 'There was an error reading the image, check python log and b64 string!!',
-                    'b64': b64_string, 'error': str(e)}
+                    'b64': b64_string}
 
 
 if __name__ == '__main__':

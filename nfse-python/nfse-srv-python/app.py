@@ -229,7 +229,7 @@ def predict_text():
 
         else:
             return {'PYTHON ERROR': 'There was an error reading the image, check python log and b64 string!!',
-                    'b64': b64_string}
+                    'BASE64': b64_string,'PYTHON ERROR MSG':str(e)}
 
 
 if __name__ == '__main__':

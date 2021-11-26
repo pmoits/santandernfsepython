@@ -124,6 +124,8 @@ def predict_text():
         passed_keys = name1.to_dict(flat=False)
         key, value = list(passed_keys.items())[0]
         if key == 'string':
+            if int(name1['id']) == 10:
+                return {'REQUEST ERROR': 'Captcha ID 10 does not receive B64 STRING parameter!!'}
             b64_string = name1['string']
 
             # read b64 image
@@ -230,9 +232,14 @@ def predict_text():
         elif int(name1['id']) not in ALLOWED_CAPTCHAS:  # not passing an valid ID
             return {'REQUEST ERROR': 'Captcha ID not allowed, verify ID value!! Passed ID was: ' + str(name1['id'])}
 
-        else:
+        elif key == 'string':
             return {'PYTHON ERROR': 'There was an error reading the image, check python log and b64 string!!',
-                    'BASE64': b64_string,'PYTHON ERROR MSG':str(e)}
+                    'b64': b64_string, 'PYTHON ERROR MSG': str(e)}
+
+        elif key == 'code':
+            link = "https://e-gov.betha.com.br/e-nota/bfcfaces/captcha.jpg?text=" + code
+            return {'PYTHON ERROR': 'There was an error reading the image, check python log and see if link exists',
+                    'link': link, 'PYTHON ERROR MSG': str(e)}
 
 
 if __name__ == '__main__':

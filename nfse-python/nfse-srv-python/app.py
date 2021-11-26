@@ -121,8 +121,8 @@ def predict_text():
         # B64 STRING
         # name1 = request.form['string']
         name1 = request.form
-        key = name1.to_dict(flat=False)
-        key, value = list(key.items())[0]
+        passed_keys = name1.to_dict(flat=False)
+        key, value = list(passed_keys.items())[0]
         if key == 'string':
             b64_string = name1['string']
 
@@ -211,17 +211,26 @@ def predict_text():
             code = name1['code']
             captcha = processing_lab.model4(code, 30)
             return {'Predicted': str(captcha)}
-        elif key == 'code':
-            return {'Predicted': 'Wrong captcha ID with key CODE'}
+        elif key == 'code' and int(name1['id']) != 10:
+            return {'REQUEST ERROR': 'Wrong ID for key CODE!!'}
 
     except Exception as e:
         logger.info('ERROR MSG')
         logger.info(e)
-        if key == 'code':
-            return {'Predicted': 'There was an error reading the image, check python log!!','code':code}
+        # Dealing with errors
+        if 'id' not in passed_keys:  # not passing ID key
+            return {'REQUEST ERROR': 'Missing ID key!!'}
+
+        elif passed_keys['id'][0] == '':  # passing ID with no value
+            return {'REQUEST ERROR': 'ID key passed with no value inside!!'}
+
+        elif int(name1['id']) not in ALLOWED_CAPTCHAS:  # not passing an valid ID
+            print('aqui')
+            return {'REQUEST ERROR': 'Captcha ID not allowed!! Verify ID value'}
+
         else:
-            return {'Predicted': 'There was an error reading the image, check python log!!', 'b64': b64_string,
-                    'error': str(e)}
+            return {'PYTHON ERROR': 'There was an error reading the image, check python log and b64 string!!',
+                    'b64': b64_string, 'error': str(e)}
 
 
 if __name__ == '__main__':
